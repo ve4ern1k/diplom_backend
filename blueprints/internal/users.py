@@ -1,7 +1,7 @@
 from flask import Blueprint, request
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from database import SessionCtx, User, orm_to_dict, UserGroupLink
-from exceptions import AuthorizationException
+from exceptions import AuthorizationException, NotFoundException
 from utils import generate_hash
 from tokens import generate_token, check_auth
 
@@ -50,6 +50,23 @@ def get_all_staff():
         return [ orm_to_dict(user, exclude_fields=['age', 'hid', 'birthday', 'login', 'quality', 'sex']) for user in users ]
 
 
+@user_bl.get('/<int:id>')
+@check_auth(need_right='update_staff')
+def get_staff(id: int):
+    with SessionCtx() as session:
+        user = session.execute(
+            select(User).where(User.id == id)
+        ).first()
+        
+        if not user:
+            raise NotFoundException(f'Пользователь с id={id} не найден')
+
+        user: User = user[0]
+        result = orm_to_dict(user, ['hid'])
+        result['userGroups'] = [ group_link.user_group_obj.title for group_link in user.user_group_links ]
+        return result
+
+
 @user_bl.post('/create')
 @check_auth(need_right='update_staff')
 def create_user():
@@ -87,3 +104,23 @@ def create_user():
         result = orm_to_dict(created_user, ['hid'])
         result['userGroups'] = [ group_link.user_group_obj.title for group_link in created_user.user_group_links ]
         return result
+
+
+@user_bl.delete('/delete/<int:id>')
+@check_auth(need_right='update_staff')
+def delete_user(id: int):
+    with SessionCtx() as session:
+        if not session.execute(
+            select(User).where(User.id == id)
+        ).first():
+            raise NotFoundException(f'Пользователь с id={id} не найден')
+
+        session.execute(
+            delete(UserGroupLink).where(UserGroupLink.user == id)
+        )
+        session.execute(
+            delete(User).where(User.id == id)
+        )
+        session.commit()
+    
+    return {'result': True}

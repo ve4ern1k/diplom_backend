@@ -11,3 +11,8 @@ class AuthorizationException(KBZBAdminBackBaseException):
 class AccessExceptiom(KBZBAdminBackBaseException):
     '''Исключение при недостаточных правах'''
     status_code = 403
+
+
+class NotFoundException(KBZBAdminBackBaseException):
+    '''Исключение если не данные не найдены'''
+    status_code = 404
