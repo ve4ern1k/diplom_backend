@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from sqlalchemy import select
-from database import SessionCtx, User, orm_to_dict
+from database import SessionCtx, User, orm_to_dict, UserGroupLink
 from exceptions import AuthorizationException
 from utils import generate_hash
 from tokens import generate_token, check_auth
@@ -38,4 +38,52 @@ def get_my_info(user_id: int):
 
         result = orm_to_dict(user, ['hid'])
         result['userGroups'] = [ group_link.user_group_obj.title for group_link in user.user_group_links ]
+        return result
+
+
+@user_bl.get('/all')
+@check_auth(need_right='see_staff')
+def get_all_staff():
+    with SessionCtx() as session:
+        users = session.query(User).all()
+
+        return [ orm_to_dict(user, exclude_fields=['age', 'hid', 'birthday', 'login', 'quality', 'sex']) for user in users ]
+
+
+@user_bl.post('/create')
+@check_auth(need_right='update_staff')
+def create_user():
+    data = request.json
+    with SessionCtx() as session:
+        created_user = User(
+            login      = data['login'],
+            hid        = generate_hash(f'{data.get("login")}{data.get("password")}'),
+            firstname  = data['firstname'],
+            lastname   = data['lastname'],
+            middlename = data['middlename'],
+            age        = data['age'],
+            birthday   = data['birthday'],
+            sex        = data['sex'],
+            quality    = data['quality'],
+            post       = data['post'],
+            experience = data['experience'],
+            salary     = data['salary'],
+            email      = data['email'],
+            phone      = data['phone'],
+        )
+        session.add( created_user )
+        session.flush([ created_user ])
+
+        for user_group_id in data.get('userGroups', []):
+            session.add(
+                UserGroupLink(
+                    user=created_user.id,
+                    user_group=user_group_id
+                )
+            )
+
+        session.commit()
+
+        result = orm_to_dict(created_user, ['hid'])
+        result['userGroups'] = [ group_link.user_group_obj.title for group_link in created_user.user_group_links ]
         return result

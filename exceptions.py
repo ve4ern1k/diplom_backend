@@ -6,3 +6,8 @@ class KBZBAdminBackBaseException(Exception):
 class AuthorizationException(KBZBAdminBackBaseException):
     '''Исключение при авторизации'''
     status_code = 401
+
+
+class AccessExceptiom(KBZBAdminBackBaseException):
+    '''Исключение при недостаточных правах'''
+    status_code = 403
