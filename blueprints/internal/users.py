@@ -1,9 +1,11 @@
+from PIL import Image
 from flask import Blueprint, request
 from sqlalchemy import select, delete
 from database import SessionCtx, User, orm_to_dict, UserGroupLink
 from exceptions import AuthorizationException, NotFoundException
 from utils import generate_hash
 from tokens import generate_token, check_auth
+from services import ImgService
 
 
 user_bl = Blueprint('user_bl', __name__)
@@ -124,3 +126,41 @@ def delete_user(id: int):
         session.commit()
     
     return {'result': True}
+
+
+@user_bl.post('/image')
+@check_auth(insert_user_id=True)
+def update_user_pic(user_id: int):
+    img_name = ImgService().save(
+        Image.open(
+            request.files['image']
+        )
+    )
+
+    with SessionCtx() as session:
+        user: User = session.query(User).get(user_id)
+        user.img = img_name
+        session.commit()
+    
+    return {'imageName': img_name}
+
+
+@user_bl.post('/update')
+@check_auth(insert_user_id=True)
+def update_password(user_id: int):
+    data = request.json
+
+    with SessionCtx() as session:
+        user: User = session.query(User).get(user_id)
+
+        user.main_page = data.get('mainPage')
+
+        if data.get('oldPassword') and data.get('newPassword'):
+            if generate_hash(f'{user.login}{data.get("oldPassword")}') != user.hid:
+                raise AuthorizationException('Неверный старый пароль')
+            
+            user.hid = generate_hash(f'{user.login}{data.get("newPassword")}')
+        
+        session.commit()
+    
+        return {'result': True}

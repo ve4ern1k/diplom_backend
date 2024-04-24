@@ -36,14 +36,10 @@ def check_auth(need_right: str = None, insert_user_id = False):
             token_data = decode_token(token)
 
             with SessionCtx() as session:
-                user = session.execute(
-                    select(User).where(User.id == token_data['user_id'])
-                ).first()
+                user = session.query(User).get(token_data['user_id'])
 
                 if not user:
                     raise AuthorizationException('Пользователь не найден')
-                
-                user: User = user[0]
 
                 if need_right is not None:
                     if not any(getattr(user_group_link.user_group_obj, need_right) for user_group_link in user.user_group_links):
