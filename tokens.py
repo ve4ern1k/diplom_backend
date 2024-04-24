@@ -22,7 +22,10 @@ def generate_token(user: User):
 
 
 def decode_token(token: str):
-    return jwt.decode(token, SECRET_TOKEN, algorithms=['HS256'])
+    try:
+        return jwt.decode(token, SECRET_TOKEN, algorithms=['HS256'])
+    except jwt.DecodeError:
+        raise AuthorizationException('Неверный токен')
 
 
 def check_auth(need_right: str = None, insert_user_id = False):
