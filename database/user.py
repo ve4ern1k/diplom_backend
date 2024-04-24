@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
 
@@ -23,6 +23,8 @@ class User(Base):
     salary: Mapped[int]
     email: Mapped[str]
     phone: Mapped[str]
+    img: Mapped[Optional[str]]
+    main_page: Mapped[str] = mapped_column(server_default='/me')
 
     user_group_links: Mapped[List['UserGroupLink']] = relationship(back_populates='user_obj')
 
