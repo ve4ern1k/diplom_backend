@@ -2,7 +2,7 @@ from PIL import Image
 from flask import Blueprint, request
 from sqlalchemy import select, delete
 from database import SessionCtx, User, orm_to_dict, UserGroupLink
-from exceptions import AuthorizationException, NotFoundException
+from exceptions import AuthorizationException, NotFoundException, ReferenceException
 from utils import generate_hash
 from tokens import generate_token, check_auth
 from services import ImgService, UserGroupService
@@ -61,7 +61,7 @@ def get_staff(id: int):
         ).first()
         
         if not user:
-            raise NotFoundException(f'Пользователь с id={id} не найден')
+            raise NotFoundException(f'Сотрудник с id={id} не найден')
 
         user: User = user[0]
         result = orm_to_dict(user, ['hid'])
@@ -74,6 +74,9 @@ def get_staff(id: int):
 def create_user():
     data = request.json
     with SessionCtx() as session:
+        if session.query(User).where(User.login == data['login']).first() is not None:
+            raise ReferenceException(f'Сотрудник с логином \"{data["login"]}\" уже существует')
+
         created_user = User(
             login      = data['login'],
             hid        = generate_hash(f'{data.get("login")}{data.get("password")}'),
@@ -102,20 +105,16 @@ def create_user():
         return result
 
 
-@user_bl.delete('/delete/<int:id>')
+@user_bl.delete('/delete')
 @check_auth(need_right='update_staff')
-def delete_user(id: int):
+def delete_user():
+    delete_ids = request.json.get('idList', [])
     with SessionCtx() as session:
-        if not session.execute(
-            select(User).where(User.id == id)
-        ).first():
-            raise NotFoundException(f'Пользователь с id={id} не найден')
-
         session.execute(
-            delete(UserGroupLink).where(UserGroupLink.user == id)
+            delete(UserGroupLink).where(UserGroupLink.user.in_(delete_ids))
         )
         session.execute(
-            delete(User).where(User.id == id)
+            delete(User).where(User.id.in_(delete_ids))
         )
         session.commit()
     

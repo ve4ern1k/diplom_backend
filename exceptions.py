@@ -16,3 +16,7 @@ class AccessExceptiom(KBZBAdminBackBaseException):
 class NotFoundException(KBZBAdminBackBaseException):
     '''Исключение если не данные не найдены'''
     status_code = 404
+
+
+class ReferenceException(KBZBAdminBackBaseException):
+    '''Исключение при ошибке в сылках'''
