@@ -3,10 +3,10 @@ from services import ImgService
 from werkzeug.exceptions import NotFound
 
 
-media = Blueprint('media', __name__)
+media_bl = Blueprint('media', __name__)
 
 
-@media.get('/<str:pic_name>')
+@media_bl.get('/<str:pic_name>')
 def get_pic(pic_name: str):
     try:
         return send_from_directory(
