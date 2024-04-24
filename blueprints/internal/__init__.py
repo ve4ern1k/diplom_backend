@@ -17,7 +17,7 @@ def add_body(r: Response):
 def handle_internal_error(exc: Exception):
     return {
         'error': True,
-        'error_class': exc.__class__.__name__,
+        'errorClass': exc.__class__.__name__,
         'message': str(exc)
     }, exc.status_code if isinstance(exc, KBZBAdminBackBaseException) else 500
 

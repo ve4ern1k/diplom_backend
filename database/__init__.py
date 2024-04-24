@@ -3,6 +3,7 @@ from settings import DB_DATABASE_NAME, DB_HOST, DB_PASSWORD, DB_PORT, DB_USER
 from contextlib import contextmanager
 from sqlalchemy import create_engine, Enum, Time, inspection
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base, Session
+from utils import to_lower_camel_case
 
 
 engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE_NAME}', echo=False)
@@ -43,16 +44,17 @@ def orm_to_dict(item, exclude_fields: List[str] = list(), to_default_types = Tru
         if col.name in exclude_fields:
             continue
         
+        colname_camel = to_lower_camel_case(col.name)
         if to_default_types:
             if isinstance(col.type, Enum):
                 val = getattr(item, col.name)
-                result[col.name] = val.name if val is not None else None
+                result[colname_camel] = val.name if val is not None else None
             elif isinstance(col.type, Time):
-                result[col.name] = str(getattr(item, col.name))
+                result[colname_camel] = str(getattr(item, col.name))
             else:
-                result[col.name] = getattr(item, col.name)
+                result[colname_camel] = getattr(item, col.name)
         else:
-            result[col.name] = getattr(item, col.name)
+            result[colname_camel] = getattr(item, col.name)
     
     return result
 
