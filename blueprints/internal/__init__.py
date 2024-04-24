@@ -23,5 +23,7 @@ def handle_internal_error(exc: Exception):
 
 
 from .users import user_bl
+from .user_group import user_group_bl
 
 internal_bl.register_blueprint(user_bl, url_prefix='/user')
+internal_bl.register_blueprint(user_group_bl, url_prefix='/user_group')
