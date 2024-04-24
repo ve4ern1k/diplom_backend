@@ -5,7 +5,7 @@ from database import SessionCtx, User, orm_to_dict, UserGroupLink
 from exceptions import AuthorizationException, NotFoundException
 from utils import generate_hash
 from tokens import generate_token, check_auth
-from services import ImgService
+from services import ImgService, UserGroupService
 
 
 user_bl = Blueprint('user_bl', __name__)
@@ -93,13 +93,7 @@ def create_user():
         session.add( created_user )
         session.flush([ created_user ])
 
-        for user_group_id in data.get('userGroups', []):
-            session.add(
-                UserGroupLink(
-                    user=created_user.id,
-                    user_group=user_group_id
-                )
-            )
+        UserGroupService(session).update_for_user(created_user.id, data.get('userGroups', []))
 
         session.commit()
 
@@ -145,9 +139,9 @@ def update_user_pic(user_id: int):
     return {'imageName': img_name}
 
 
-@user_bl.post('/update')
+@user_bl.post('/update_my')
 @check_auth(insert_user_id=True)
-def update_password(user_id: int):
+def update_my_data(user_id: int):
     data = request.json
 
     with SessionCtx() as session:
@@ -164,3 +158,28 @@ def update_password(user_id: int):
         session.commit()
     
         return {'result': True}
+
+
+@user_bl.post('/update')
+@check_auth(need_right='update_staff')
+def update_user():
+    data = request.json
+    user_id = data.get('id')
+
+    with SessionCtx() as session:
+        user: User | None = session.query(User).get(user_id)
+        
+        if user is None:
+            raise NotFoundException(f'Сотрудник с id={user_id} не найден')
+
+        for field, value in data.items():
+            if field not in ('id', 'userGroups') and hasattr(user, field):
+                setattr(user, field, value)
+        
+        UserGroupService(session).update_for_user(user_id, data.get('userGroups', []))
+
+        session.commit()
+
+        result = orm_to_dict(user, ['hid'])
+        result['userGroups'] = [ group_link.user_group_obj.title for group_link in user.user_group_links ]
+        return result
