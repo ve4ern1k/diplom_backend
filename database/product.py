@@ -12,7 +12,7 @@ class Product(Base):
     image: Mapped[Optional[str]]
     category: Mapped[int] = mapped_column(ForeignKey('categories.id'))
     cost: Mapped[int]
-    data: Mapped[JSON] = mapped_column(type_=JSON)
+    data: Mapped[Optional[JSON]] = mapped_column(type_=JSON, nullable=True)
 
     category_model: Mapped['Category'] = relationship(back_populates='products', uselist=False)
     order_items: Mapped[List['OrderItem']] = relationship(back_populates='product_model', uselist=True)
