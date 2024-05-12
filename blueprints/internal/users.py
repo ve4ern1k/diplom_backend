@@ -172,7 +172,7 @@ def update_user():
             raise NotFoundException(f'Сотрудник с id={user_id} не найден')
 
         for field, value in data.items():
-            if field not in ('id', 'userGroups') and hasattr(user, field):
+            if field not in ('id', 'userGroups', 'hid') and hasattr(user, field):
                 setattr(user, field, value)
         
         UserGroupService(session).update_for_user(user_id, data.get('userGroups', []))
@@ -182,3 +182,22 @@ def update_user():
         result = orm_to_dict(user, ['hid'])
         result['userGroups'] = [ group_link.user_group_obj.title for group_link in user.user_group_links ]
         return result
+
+
+@user_bl.post('/update_auth')
+@check_auth(need_right='change_auth_data')
+def update_auth_data():
+    data = request.json
+    user_id = data.get('id')
+
+    with SessionCtx() as session:
+        user: User | None = session.query(User).get(user_id)
+        if user is None:
+            raise NotFoundException(f'Сотрудник с id={user_id} не найден')
+        
+        user.login = data['login']
+        user.hid = generate_hash(f'{user.login}{data["password"]}')
+
+        session.commit()
+
+        return { 'result': 'success' }
