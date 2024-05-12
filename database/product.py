@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from . import Base
@@ -15,5 +15,8 @@ class Product(Base):
     data: Mapped[JSON] = mapped_column(type_=JSON)
 
     category_model: Mapped['Category'] = relationship(back_populates='products', uselist=False)
+    order_items: Mapped[List['OrderItem']] = relationship(back_populates='product_model', uselist=True)
+
 
 from .category import Category
+from .order_item import OrderItem

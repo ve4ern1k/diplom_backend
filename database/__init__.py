@@ -64,3 +64,5 @@ from .user_group import UserGroup
 from .user_group_link import UserGroupLink
 from .category import Category
 from .product import Product
+from .order import Order
+from .order_item import OrderItem
