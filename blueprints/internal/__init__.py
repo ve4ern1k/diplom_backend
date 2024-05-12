@@ -26,8 +26,12 @@ from .users import user_bl
 from .user_group import user_group_bl
 from .products import products_bl
 from .orders import order_bl
+from .publications import publication_bl
+from .publications_edit import publication_edit_bl
 
 internal_bl.register_blueprint(user_bl, url_prefix='/user')
 internal_bl.register_blueprint(user_group_bl, url_prefix='/user_group')
 internal_bl.register_blueprint(products_bl, url_prefix='/product')
 internal_bl.register_blueprint(order_bl, url_prefix='/order')
+internal_bl.register_blueprint(publication_bl, url_prefix='/publication')
+internal_bl.register_blueprint(publication_edit_bl, url_prefix='/publication/edit')

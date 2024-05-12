@@ -28,5 +28,9 @@ class User(Base):
 
     user_group_links: Mapped[List['UserGroupLink']] = relationship(back_populates='user_obj')
 
+    @property
+    def fullname(self) -> str:
+        return f'{self.lastname} {self.firstname} {self.middlename}'
+
 
 from .user_group_link import UserGroupLink
