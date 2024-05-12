@@ -62,3 +62,5 @@ def orm_to_dict(item, exclude_fields: List[str] = list(), to_default_types = Tru
 from .user import User
 from .user_group import UserGroup
 from .user_group_link import UserGroupLink
+from .category import Category
+from .product import Product
