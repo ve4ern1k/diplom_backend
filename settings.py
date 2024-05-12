@@ -6,3 +6,6 @@ DB_PORT = 5432
 DB_USER = 'kbzb_admin'
 DB_PASSWORD = 'abobabebra'
 DB_DATABASE_NAME = 'kbzb_db'
+
+USER_DEFAULT_LOGIN = '1'
+USER_DEFAULT_PASSWORD = '1'
