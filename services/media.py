@@ -16,9 +16,9 @@ class ImgService:
         return dir
 
 
-    def save(self, image: Image.Image, mode = 'JPEG') -> str:
-        img_name = str(uuid4()) + '.jpg'
-        image.save( os.path.join(self.folder, img_name), mode, quality=90, optimize=True, progressive=True )
+    def save(self, image: Image.Image) -> str:
+        img_name = str(uuid4()) + '.' + image.format
+        image.save( os.path.join(self.folder, img_name), image.format, quality=90, optimize=True, progressive=True )
         return img_name
 
 
