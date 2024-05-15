@@ -48,16 +48,16 @@ def create_user_group():
         group = UserGroup(
             title=data['title'],
             description=data['description'],
-            see_staff=data['seeStaff'],
-            see_staff_groups=data['seeStaffGroups'],
-            see_orders=data['seeOrders'],
-            see_publications=data['seePublications'],
-            update_staff=data['updateStaff'],
-            update_staff_groups=data['updateStaffGroups'],
-            update_orders=data['updateOrders'],
-            update_publications=data['updatePublications'],
-            change_auth_data=data['changeAuthData'],
-            write_publications=data['writePublications'],
+            see_staff=data.get('seeStaff', False),
+            see_staff_groups=data.get('seeStaffGroups', False),
+            see_orders=data.get('seeOrders', False),
+            see_publications=data.get('seePublications', False),
+            update_staff=data.get('updateStaff', False),
+            update_staff_groups=data.get('updateStaffGroups', False),
+            update_orders=data.get('updateOrders', False),
+            update_publications=data.get('updatePublications', False),
+            change_auth_data=data.get('changeAuthData', False),
+            write_publications=data.get('writePublications', False),
         )
         session.add(group)
         session.commit()
