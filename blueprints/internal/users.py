@@ -178,6 +178,9 @@ def update_user():
         if user is None:
             raise NotFoundException(f'Сотрудник с id={user_id} не найден')
 
+        if 'login' in data and session.query(User).where((User.login == data['login']) & (User.id != user_id)).first() is not None:
+            raise ReferenceException('Пользователь с таким логином уже существует')
+
         for field, value in data.items():
             if field not in ('id', 'userGroups', 'hid') and hasattr(user, field):
                 setattr(user, field, value)
