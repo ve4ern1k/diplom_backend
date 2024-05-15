@@ -106,9 +106,13 @@ def create_user():
 
 
 @user_bl.delete('/delete')
-@check_auth(need_right='update_staff')
-def delete_user():
+@check_auth(need_right='update_staff', insert_user_id=True)
+def delete_user(user_id: int):
     delete_ids = request.json.get('idList', [])
+
+    if any(user_id == deleted_id for deleted_id in delete_ids):
+        raise ReferenceException('Вы не можете удалить собственный аккаунт')
+
     with SessionCtx() as session:
         session.execute(
             delete(UserGroupLink).where(UserGroupLink.user.in_(delete_ids))
