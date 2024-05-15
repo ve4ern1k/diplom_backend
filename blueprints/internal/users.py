@@ -202,6 +202,9 @@ def update_auth_data():
         if user is None:
             raise NotFoundException(f'Сотрудник с id={user_id} не найден')
         
+        if not data.get('login') or not data.get('password'):
+            raise ReferenceException('Поля логина и пароля являются обязательными')
+
         user.login = data['login']
         user.hid = generate_hash(f'{user.login}{data["password"]}')
 
