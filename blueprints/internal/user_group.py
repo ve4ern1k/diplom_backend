@@ -2,7 +2,7 @@ from flask import Blueprint, request
 from sqlalchemy import delete
 from tokens import check_auth
 from database import SessionCtx, UserGroup, orm_to_dict, UserGroupLink
-from exceptions import NotFoundException
+from exceptions import NotFoundException, ReferenceException
 from utils import to_snake_case
 
 
@@ -45,6 +45,9 @@ def get_group(group_id: int):
 def create_user_group():
     data = request.json
     with SessionCtx() as session:
+        if not data.get('title') or not data.get('description'):
+            raise ReferenceException('Поля заголовка и описания являются обязательными')
+
         group = UserGroup(
             title=data['title'],
             description=data['description'],
@@ -76,6 +79,9 @@ def update_group():
         
         if group is None:
             raise NotFoundException(f'Группа с id={group_id} не найден')
+        
+        if any(field in data and not data[field] for field in ('title', 'description')):
+            raise ReferenceException('Поля заголовка и описания являются обязательными')
 
         for field, value in data.items():
             snake_field = to_snake_case(field)
