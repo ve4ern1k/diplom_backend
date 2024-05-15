@@ -57,7 +57,7 @@ def get_all_orders():
         return [
             {
                 **orm_to_dict(order),
-                'fullPrice': sum(item.price for item in order.items)
+                'fullPrice': sum(item.price * item.count for item in order.items)
             }
             for order in session.query(Order).all()
         ]
