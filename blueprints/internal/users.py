@@ -77,6 +77,9 @@ def create_user():
         if session.query(User).where(User.login == data['login']).first() is not None:
             raise ReferenceException(f'Сотрудник с логином \"{data["login"]}\" уже существует')
 
+        if not data['login'] or not data['password']:
+            raise ReferenceException('Поля login и password являются обязательными для создания пользователя')
+
         created_user = User(
             login      = data['login'],
             hid        = generate_hash(f'{data.get("login")}{data.get("password")}'),
