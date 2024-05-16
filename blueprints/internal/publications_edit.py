@@ -116,3 +116,12 @@ def deletePublications():
         session.commit()
     
     return {'result': True}
+
+
+@publication_edit_bl.delete('/image')
+@check_auth(need_right='update_publications')
+def delete_image():
+    ImgService().delete(
+        request.json['imageName']
+    )
+    return {'result': True}

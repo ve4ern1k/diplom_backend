@@ -24,3 +24,9 @@ class ImgService:
 
     def retreive_path(self):
         return self.folder
+    
+    
+    def delete(self, image_name: str):
+        path_to_image = os.path.join(self.folder, image_name)
+        if os.path.exists( path_to_image ):
+            os.remove(path_to_image)
