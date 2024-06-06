@@ -36,7 +36,7 @@ class Publication(Base):
         else:
             return [
                 cratch(item)
-                for item in self.structure if item.get('visible', True)
+                for item in self.structure
             ]
 
 
