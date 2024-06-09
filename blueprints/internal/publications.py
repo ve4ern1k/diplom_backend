@@ -32,5 +32,5 @@ def get_publication_for_id(publ_id: int):
             'title': publ.title,
             'date': publ.date.strftime('%d.%m.%Y'),
             'image': publ.image,
-            'structure': publ.structure_only_visible
+            'structure': publ.structure
         }
